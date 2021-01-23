@@ -1,19 +1,48 @@
 <template>
     <div class="main">
         <div class="button-container">
-            <v-btn class="capture-btn" :disabled="isStopped" @click="captureHandler"><v-icon small color="green">mdi-record</v-icon> Record</v-btn> 
-            <v-btn class="stop-btn" :disabled="isRecording" @click="stopHandler"><v-icon small color="red">mdi-stop</v-icon> Stop</v-btn>
-            <v-btn class="trash-btn" :disabled="canTrash" @click="trashHandler"><v-icon medium color="grey">mdi-trash-can</v-icon></v-btn>
-            <a class="download-button"><v-icon small>mdi-cloud</v-icon> Download</a>
+            <v-btn 
+                class="capture-btn"
+                ref="capture-btn"
+                :disabled="disableStopped"
+                @click="captureHandler">
+                <v-icon small color="green">mdi-record</v-icon> Record
+            </v-btn> 
+            <v-btn 
+                class="stop-btn"
+                ref="stop-btn" 
+                :disabled="disableRecording" 
+                @click="stopHandler">
+                <v-icon small color="red">mdi-stop</v-icon> Stop
+            </v-btn>
+            <v-btn 
+                class="trash-btn"
+                ref="trash-btn" 
+                :disabled="disableTrash" 
+                @click="trashHandler">
+                <v-icon medium color="grey">mdi-trash-can</v-icon>
+            </v-btn>
+            <a class="download-button" ref="downloadButton">
+                <v-icon small>mdi-cloud</v-icon> Download
+            </a>
         </div>
         <br>
         <span class="text">Preview:</span>
         <br>
-        <video class="preview" muted autoplay></video>
+        <video 
+            class="preview" 
+            ref="preview"
+            muted 
+            autoplay>
+        </video>
         <br>
         <span class="text">Your Recording:</span>
         <br>
-        <video class="recording" controls></video>
+        <video 
+            class="recording" 
+            ref="recording" 
+            controls>
+        </video>
     </div>
 </template>
 
@@ -28,31 +57,30 @@ export default {
             },
             audio: false
         },
-         isRecording: true,
-         isStopped: false,
-         canTrash: true
+         disableRecording: true,
+         disableStopped: false,
+         disableTrash: true
     }),
     methods: {
         // Captures the user interactions of the browser, sends those frames to our
         // startRecording handler, which then returns values that are converted to a Blob,
         // given a unique URL, and finally is downloadable via the download button
         captureHandler() {
-            const videoSource = document.querySelector(".preview");
-            const downloadButton = document.querySelector(".download-button");
+            const previewSource = this.$refs.preview;
+            const downloadButton = this.$refs.downloadButton;
 
             navigator.mediaDevices.getDisplayMedia(this.mediaConfig)
             .then(stream => {
-                videoSource.srcObject = stream;
+                previewSource.srcObject = stream;
                 downloadButton.href = stream;
-                videoSource.captureStream = videoSource.captureStream || videoSource.mozCaptureStream;
-                return new Promise(resolve => videoSource.onplaying = resolve);
+                previewSource.captureStream = previewSource.captureStream || previewSource.mozCaptureStream;
+                return new Promise(resolve => previewSource.onplaying = resolve);
             })
-            .then(() => this.startRecording(videoSource.captureStream(), this.RECORDING_TIME_MS))
+            .then(() => this.startRecording(previewSource.captureStream(), this.RECORDING_TIME_MS))
             .then (recordedChunks => {
-                const recording = document.querySelector(".recording");
                 let recordedBlob = new Blob(recordedChunks, { type: "video/mp4" });
-                recording.src = URL.createObjectURL(recordedBlob);
-                downloadButton.href = recording.src;
+                this.$refs.recording.src = URL.createObjectURL(recordedBlob);
+                downloadButton.href = this.$refs.recording.src;
                 downloadButton.download = "recording.mp4";
             })
         },
@@ -61,8 +89,8 @@ export default {
             let recorder = new MediaRecorder(stream);
             let data = [];
 
-            this.isRecording = false;
-            this.isStopped = true;
+            this.disableRecording = false;
+            this.disableStopped = true;
 
             recorder.ondataavailable = event => data.push(event.data);
             recorder.start();
@@ -74,7 +102,7 @@ export default {
 
             // Long polling to check when screen recording has been stopped by client
             let recorded = new Promise(resolve => setInterval(() => {
-                if (!this.isStopped) resolve();
+                if (!this.disableStopped) resolve();
             }, 200))
             .then(() => recorder.state == "recording" && recorder.stop());
 
@@ -83,27 +111,23 @@ export default {
         },
         // Handles the stopping of recording after client "stop" button click
         stopHandler() {
-            this.isRecording = true;
-            this.isStopped = false;
-            this.canTrash = false;
-            const videoSource = document.querySelector(".preview");
-            let tracks = videoSource.srcObject.getTracks();
+            const tracks = this.$refs.preview.srcObject.getTracks();
+
+            this.disableRecording = true;
+            this.disableStopped = false;
+            this.disableTrash = false;
 
             tracks.forEach(track => { track.stop(); })
-            videoSource.srcObject = null;
-            document.querySelector("a").style.display = "inline"
+            this.$refs.preview.srcObject = null;
+            this.$refs.downloadButton.style.display = "inline";
         },
         trashHandler() {
-            const videoSource = document.querySelector(".preview");
-            const downloadButton = document.querySelector(".download-button");
-            const recording = document.querySelector(".recording");
-
-            videoSource.src = null;
-            downloadButton.href = null;
-            downloadButton.download = null;
-            downloadButton.style.display = "none";
-            recording.src = null;
-            this.canTrash = true;
+            this.$refs.preview.src = null;
+            this.$refs.downloadButton.href = null;
+            this.$refs.downloadButton.download = null;
+            this.$refs.downloadButton.style.display = "none";
+            this.$refs.recording.src = null;
+            this.disableTrash = true;
         }
     }
 }
@@ -128,7 +152,7 @@ export default {
         border: 1px solid grey;
         margin: 5px;
         height: 300px;
-        width: 600px;
+        width: 500px;
         background-color: #f2f2f2;
     }
 
