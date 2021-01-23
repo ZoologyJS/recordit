@@ -9,7 +9,7 @@
             <v-row align="center" justify="center" style="padding: 20px;">
                 <div class="another-cont">
                     <p class="directions">
-                        <b>Here's how to start:</b>
+                        <b>Here's how to start: </b>
                         <br>
                         1. Select the "Record" button.
                         <br>
