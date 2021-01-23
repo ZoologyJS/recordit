@@ -1,24 +1,5 @@
-# vuetifyplayground
+# RecordIt
 
-## Project setup
-```
-npm install
-```
+An easy-to-use screen recorder. Preview your recording, trash it, or download it as an mp4.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+See it live at [recordit.herokuapp.com](https://record-it9.herokuapp.com/)
