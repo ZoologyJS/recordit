@@ -54,29 +54,12 @@ export default {
             },
             audio: false
         },
-         RECORDING_TIME_MS: 5000,
+         RECORDING_TIME_MS: 4000,
          isRecording: true,
          isStopped: false
     }),
     methods: {
-        stopHandler() {
-            this.isRecording = true;
-            this.isStopped = false;
-            const videoSource = document.querySelector(".preview");
-            let tracks = videoSource.srcObject.getTracks();
-
-            tracks.forEach(track => {
-                track.stop();
-            })
-            videoSource.srcObject = null;
-            document.querySelector("a").style.display = "inline"
-        },
-        // downloadHandler() {
-            
-        // },
         captureHandler() {
-            this.isRecording = false;
-            this.isStopped = true;
             const videoSource = document.querySelector(".preview");
             const downloadButton = document.querySelector(".download-button");
 
@@ -97,9 +80,11 @@ export default {
                 })
         },
         startRecording(stream, lengthInMS) {
-            console.log("recording started");
             let recorder = new MediaRecorder(stream);
             let data = [];
+
+            this.isRecording = false;
+            this.isStopped = true;
 
             recorder.ondataavailable = event => data.push(event.data);
             recorder.start();
@@ -118,8 +103,20 @@ export default {
             ])
             .then(() => data);
         },
-        wait(delayInMS) {
-            return new Promise(resolve => setTimeout(resolve, delayInMS));
+        wait() {
+            return new Promise(resolve => setInterval(() => {
+                if (!this.isStopped) resolve();
+            }, 200));
+        },
+        stopHandler() {
+            this.isRecording = true;
+            this.isStopped = false;
+            const videoSource = document.querySelector(".preview");
+            let tracks = videoSource.srcObject.getTracks();
+
+            tracks.forEach(track => { track.stop(); })
+            videoSource.srcObject = null;
+            document.querySelector("a").style.display = "inline"
         }
     }
 }
