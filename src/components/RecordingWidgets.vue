@@ -1,23 +1,66 @@
 <template>
     <div class="main">
         <div class="button-container">
-            <v-btn 
-                class="capture-btn"
-                ref="capture-btn"
-                :disabled="disableStopped"
-                @click="captureHandler">
-                <v-icon small color="green">mdi-record</v-icon> Record
-            </v-btn> 
+            <v-dialog
+            v-model="dialog"
+            width="500"
+            >
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                    class="capture-btn"
+                    :disabled="disableStopped"
+                    v-bind="attrs"
+                    v-on="on"
+                    >
+                    <v-icon small color="green">mdi-record</v-icon> Record
+                    </v-btn>
+                </template>
+
+                <v-card>
+                    <v-card-title>
+                    Recording Source
+                    </v-card-title>
+
+                    <v-card-text>
+                    Select what media you would like to record.
+                    </v-card-text>
+
+                    <v-divider></v-divider>
+
+                    <!-- <v-card-actions> -->
+                    <v-spacer></v-spacer>
+                    <div class="d-flex">
+                        <v-checkbox 
+                            v-model="soundCheck"
+                            class="mr-auto ml-4"
+                            label="Record audio"
+                        ></v-checkbox>
+                        <v-btn
+                            class="mt-3 mr-2"
+                            color="primary"
+                            @click="dialog = false; captureHandler('webcam')"
+                        >
+                            Webcam
+                        </v-btn>
+                        <v-btn
+                            class="mt-3 mr-4"
+                            color="primary"
+                            @click="dialog = false; captureHandler('screen')"
+                        >
+                            Screen
+                        </v-btn>
+                    </div>
+                    <!-- </v-card-actions> -->
+                </v-card>
+            </v-dialog>
             <v-btn 
                 class="stop-btn"
-                ref="stop-btn" 
                 :disabled="disableRecording" 
                 @click="stopHandler">
                 <v-icon small color="red">mdi-stop</v-icon> Stop
             </v-btn>
             <v-btn 
                 class="trash-btn"
-                ref="trash-btn" 
                 :disabled="disableTrash" 
                 @click="trashHandler">
                 <v-icon medium color="grey">mdi-trash-can</v-icon>
@@ -50,27 +93,31 @@
 export default {
     name: "RecordingWidgets",
     data: () => ({
-        // Configurations for capturing screen media
-        mediaConfig: {
-            video: {
-                cursor: "always"
-            },
-            audio: false
-        },
-         disableRecording: true,
-         disableStopped: false,
-         disableTrash: true
+        dialog: false,
+        disableRecording: true,
+        disableStopped: false,
+        disableTrash: true,
+        soundCheck: false
     }),
     methods: {
         // Captures the user interactions of the browser, sends those frames to our
         // startRecording handler, which then returns values that are converted to a Blob,
         // given a unique URL, and finally is downloadable via the download button
-        captureHandler() {
+        captureHandler(source) {
             const previewSource = this.$refs.preview;
             const downloadButton = this.$refs.downloadButton;
-
-            navigator.mediaDevices.getDisplayMedia(this.mediaConfig)
-            .then(stream => {
+            const configz = {       
+                video: {
+                    cursor: "always"
+                },
+                audio: this.soundCheck
+            }
+            console.log
+            const mediaSource = source == "screen" 
+                ? navigator.mediaDevices.getDisplayMedia(configz) 
+                : navigator.mediaDevices.getUserMedia(configz);
+            
+            mediaSource.then(stream => {
                 previewSource.srcObject = stream;
                 downloadButton.href = stream;
                 previewSource.captureStream = previewSource.captureStream || previewSource.mozCaptureStream;
@@ -136,7 +183,7 @@ export default {
 <style scoped>
     @import url('https://fonts.googleapis.com/css2?family=Alice&display=swap');
 
-    button, a {
+    .stop-btn, .capture-btn, .trash-btn, a {
         border: 1px solid grey;
         border-radius: 5px;
         padding: 5px 15px;
@@ -152,7 +199,7 @@ export default {
         border: 1px solid grey;
         margin: 5px;
         height: 300px;
-        width: 500px;
+        width: 600px;
         background-color: #f2f2f2;
     }
 

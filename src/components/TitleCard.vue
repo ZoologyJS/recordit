@@ -6,6 +6,8 @@
                 <br>
                 <span class="under-title"><i>Capture your screen in seconds!</i></span>
             </v-row>
+            <v-divider />
+            <br>
             <v-row align="center" justify="center" style="padding: 20px;">
                 <div class="another-cont">
                     <p class="directions">
