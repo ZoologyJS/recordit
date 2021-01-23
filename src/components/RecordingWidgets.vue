@@ -120,6 +120,10 @@ export default {
         background-color: #f2f2f2;
     }
 
+    .button-container {
+        max-width: 600px;
+    }
+
     video {
         border: 1px solid grey;
         margin: 5px;
@@ -130,10 +134,6 @@ export default {
 
     .text {
         color: white;
-    }
-
-    .button-container {
-        max-width: 600px;
     }
 
     a {
