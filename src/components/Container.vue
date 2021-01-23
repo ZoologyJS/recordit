@@ -148,10 +148,6 @@ export default {
         color: white;
     }
 
-    .cont {
-        /* background-color: red;       */
-    }
-
     .button-container {
         max-width: 600px;
     }
