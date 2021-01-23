@@ -12,7 +12,7 @@
                     v-bind="attrs"
                     v-on="on"
                     >
-                    <v-icon small color="green">mdi-record</v-icon> Record
+                    <v-icon small color="green">mdi-record</v-icon> Record 
                     </v-btn>
                 </template>
 
