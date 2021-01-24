@@ -56,7 +56,7 @@
             <v-btn 
                 class="stop-btn"
                 :disabled="disableRecording" 
-                @click="stopHandler">
+                @click="stopHandler(); snackbar = false">
                 <v-icon small color="red">mdi-stop</v-icon> Stop
             </v-btn>
             <v-btn 
@@ -66,7 +66,7 @@
                 <v-icon medium color="grey">mdi-trash-can</v-icon>
             </v-btn>
             <a class="download-button" ref="downloadButton">
-                <v-icon small>mdi-cloud</v-icon> Download
+                <v-icon class="mr-1" small>mdi-cloud-download</v-icon>Download
             </a>
         </div>
         <br>
@@ -86,6 +86,15 @@
             ref="recording" 
             controls>
         </video>
+
+        <v-snackbar
+        v-model="snackbar"
+        timeout="-1"
+        color="red"
+        content-class="text-center"
+        >
+        Recording in progress...
+        </v-snackbar>
     </div>
 </template>
 
@@ -97,7 +106,8 @@ export default {
         disableRecording: true,
         disableStopped: false,
         disableTrash: true,
-        soundCheck: false
+        soundCheck: false,
+        snackbar: false
     }),
     methods: {
         // Captures the user interactions of the browser, sends those frames to our
@@ -138,6 +148,7 @@ export default {
 
             this.disableRecording = false;
             this.disableStopped = true;
+            this.snackbar = true;
 
             recorder.ondataavailable = event => data.push(event.data);
             recorder.start();
@@ -166,7 +177,7 @@ export default {
 
             tracks.forEach(track => { track.stop(); })
             this.$refs.preview.srcObject = null;
-            this.$refs.downloadButton.style.display = "inline";
+            this.$refs.downloadButton.style.display = "flex";
         },
         trashHandler() {
             this.$refs.preview.src = null;
@@ -203,9 +214,18 @@ export default {
         background-color: #f2f2f2;
     }
 
+    .download-button {
+        align-items: center;
+        justify-content: center;
+    }
+
     .text {
         color: white;
     }
+
+    /* .v-snack__content {
+        text-align: center !important
+    } */
 
     a {
         text-decoration: none;
